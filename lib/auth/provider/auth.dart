@@ -24,23 +24,25 @@ class Auth extends StateNotifier<AuthState> {
     );
   }
 
-  void logIn({
+  Future<void> logIn({
     required String email,
     required String password,
   }) async {
     state = AuthState.waiting;
 
     String? response = await storage.read(key: 'user');
-    List<Map<String, String>> userPassword = json.decode(response!);
 
-    if (userPassword.isEmpty) {
-      throw LogInException('No User exist');
-    } else if (password ==
-        userPassword.firstWhere((element) => element.containsKey(email))) {
-      state = AuthState.loggedIn;
-    } else {
-      throw LogInException('Check the password');
-    }
+    if (response == null) throw LogInException('No user Found');
+
+    List<Map<String, String>> userPasswordJSON = json.decode(response);
+    String userPassword = userPasswordJSON.firstWhere(
+          (element) {
+            return element.containsKey(email);
+          },
+        )['password'] ??
+        "";
+    if (password != userPassword) throw LogInException('Check your password');
+    state = AuthState.loggedIn;
   }
 
   Future<User> signUp({
@@ -76,7 +78,3 @@ class Auth extends StateNotifier<AuthState> {
     return user;
   }
 }
-
-final authProvider = StateNotifierProvider<Auth, AuthState>(
-  (ref) => Auth(const FlutterSecureStorage()),
-);

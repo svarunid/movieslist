@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../provider/auth.dart';
+import '../../main.dart';
 
 class LogInScreen extends HookConsumerWidget {
   LogInScreen({Key? key}) : super(key: key);
@@ -13,7 +13,27 @@ class LogInScreen extends HookConsumerWidget {
     TextEditingController _emailController = useTextEditingController();
     TextEditingController _passwordController = useTextEditingController();
     FocusNode focus = useFocusNode();
-    Auth auth = ref.read(authProvider.notifier);
+
+    const SizedBox sizedBox = SizedBox(
+      height: 14,
+    );
+
+    void logIn() {
+      ref
+          .read(authProvider.notifier)
+          .logIn(
+            email: _emailController.text,
+            password: _passwordController.text,
+          )
+          .catchError((e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).errorColor,
+          ),
+        );
+      });
+    }
 
     return Scaffold(
       body: Padding(
@@ -45,9 +65,7 @@ class LogInScreen extends HookConsumerWidget {
                         }
                       },
                     ),
-                    const SizedBox(
-                      height: 14,
-                    ),
+                    sizedBox,
                     TextFormField(
                       focusNode: focus,
                       controller: _passwordController,
@@ -65,32 +83,16 @@ class LogInScreen extends HookConsumerWidget {
                         }
                       },
                     ),
-                    const SizedBox(
-                      height: 14,
-                    ),
+                    sizedBox,
                     ElevatedButton(
-                      onPressed: () {
-                        try {
-                          auth.logIn(
-                            email: _emailController.text.isEmpty ? '' : _emailController.text,
-                            password: _passwordController.text.isEmpty ? '' : _passwordController.text,
-                          );
-                        } catch (e) {
-                          // ScaffoldMessenger.of(context).showSnackBar(
-                          //   SnackBar(
-                          //     content: Text(e.toString()),
-                          //   ),
-                          // );
-                          print(e.toString());
-                        }
-                      },
+                      onPressed: logIn,
                       child: const Text("Log In"),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
