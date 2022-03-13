@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../main.dart';
+import '../../utils/utilities.dart';
 
 class LogInScreen extends HookConsumerWidget {
   LogInScreen({Key? key}) : super(key: key);
@@ -35,70 +36,88 @@ class LogInScreen extends HookConsumerWidget {
       });
     }
 
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width * 0.15,
-        ),
-        child: Center(
-          child: Card(
-            child: Container(
-              margin: const EdgeInsets.all(20),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      autofocus: true,
-                      controller: _emailController,
-                      validator: (str) {
-                        RegExp exp = RegExp(r".{1,}@[^.]{1,}");
-                        if (str!.isEmpty || exp.hasMatch(str)) {
-                          return "Enter a valid email";
-                        }
-                        return null;
-                      },
-                      onFieldSubmitted: (str) {
-                        if (_formKey.currentState!.validate()) {
-                          FocusScope.of(context).requestFocus(focus);
-                        }
-                      },
-                    ),
-                    sizedBox,
-                    TextFormField(
-                      focusNode: focus,
-                      controller: _passwordController,
-                      validator: (str) {
-                        RegExp exp =
-                            RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
-                        if (str!.isEmpty || exp.hasMatch(str)) {
-                          return "Minimum 8 characters and 1 number";
-                        }
-                        return null;
-                      },
-                      onFieldSubmitted: (str) {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState?.save();
-                        }
-                      },
-                    ),
-                    sizedBox,
-                    ElevatedButton(
-                      onPressed: logIn,
-                      child: const Text("Log In"),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
+    return WillPopScope(
+      onWillPop: () async {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.amber[200],
+        body: ref.watch(authProvider) == AuthState.waiting
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.15,
+                ),
+                child: Center(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              autofocus: true,
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                hintText: 'Email',
+                              ),
+                              validator: (str) {
+                                RegExp exp =
+                                    RegExp(r"[a-z0-9]+@[a-z]+\.[a-z]{2,3}");
+                                if (str!.isEmpty || !exp.hasMatch(str)) {
+                                  return "Enter a valid email";
+                                }
+                                return null;
+                              },
+                              onFieldSubmitted: (str) {
+                                if (_formKey.currentState!.validate()) {
+                                  FocusScope.of(context).requestFocus(focus);
+                                }
+                              },
+                            ),
+                            sizedBox,
+                            TextFormField(
+                              focusNode: focus,
+                              controller: _passwordController,
+                              decoration: const InputDecoration(
+                                hintText: 'Password',
+                              ),
+                              validator: (str) {
+                                RegExp exp = RegExp(
+                                    r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
+                                if (str!.isEmpty || !exp.hasMatch(str)) {
+                                  return "Minimum 8 characters and 1 number";
+                                }
+                                return null;
+                              },
+                              onFieldSubmitted: (str) {
+                                if (_formKey.currentState!.validate()) {
+                                  _formKey.currentState?.save();
+                                }
+                              },
+                            ),
+                            sizedBox,
+                            ElevatedButton(
+                              onPressed: logIn,
+                              child: const Text("Log In"),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }

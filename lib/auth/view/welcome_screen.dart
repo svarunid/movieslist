@@ -36,7 +36,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                MaterialPageRoute(builder: (context) => SignUpScreen()),
               ),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(

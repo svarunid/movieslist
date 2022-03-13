@@ -32,25 +32,31 @@ class Auth extends StateNotifier<AuthState> {
 
     String? response = await storage.read(key: 'user');
 
-    if (response == null) throw LogInException('No user Found');
+    if (response == null) {
+      state = AuthState.loggedOut;
+      throw LogInException('No user Found');
+    }
 
-    List<Map<String, String>> userPasswordJSON = json.decode(response);
+    List<Map<String, String>> userPasswordJSON = jsonDecode(response);
     String userPassword = userPasswordJSON.firstWhere(
           (element) {
             return element.containsKey(email);
           },
         )['password'] ??
         "";
-    if (password != userPassword) throw LogInException('Check your password');
+    if (password != userPassword) {
+      state = AuthState.loggedOut;
+      throw LogInException('Check your password');
+    }
     state = AuthState.loggedIn;
   }
 
   Future<User> signUp({
-    required name,
-    required email,
-    required phoneNumber,
-    required profession,
-    required password,
+    required String name,
+    required String email,
+    required String phoneNumber,
+    required String profession,
+    required String password,
   }) async {
     User user = User(
       name: name,
@@ -62,12 +68,18 @@ class Auth extends StateNotifier<AuthState> {
 
     state = AuthState.waiting;
 
+    String? response = await storage.read(key: 'user');
+
+    List<Map<String, String>> users =
+        response == null ? [] : jsonDecode(response);
+
     await storage.write(
       key: 'user',
       value: json.encode(
-        [user.toJson()],
+        users..add(user.toJson()),
       ),
     );
+    
     await storage.write(
       key: 'status',
       value: "1",

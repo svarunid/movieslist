@@ -8,6 +8,7 @@ class MoviesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: Container(),
+      drawer: const Drawer(),
     );
   }
 }
