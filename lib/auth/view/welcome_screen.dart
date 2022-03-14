@@ -34,6 +34,9 @@ class WelcomeScreen extends StatelessWidget {
               ),
               child: const Text("Login"),
             ),
+            const SizedBox(
+              height: 8,
+            ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => SignUpScreen()),

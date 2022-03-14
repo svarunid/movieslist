@@ -13,7 +13,7 @@ class LogInScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     TextEditingController _emailController = useTextEditingController();
     TextEditingController _passwordController = useTextEditingController();
-    FocusNode focus = useFocusNode();
+    FocusNode _focus = useFocusNode();
 
     const SizedBox sizedBox = SizedBox(
       height: 14,
@@ -76,13 +76,13 @@ class LogInScreen extends HookConsumerWidget {
                               },
                               onFieldSubmitted: (str) {
                                 if (_formKey.currentState!.validate()) {
-                                  FocusScope.of(context).requestFocus(focus);
+                                  FocusScope.of(context).requestFocus(_focus);
                                 }
                               },
                             ),
                             sizedBox,
                             TextFormField(
-                              focusNode: focus,
+                              focusNode: _focus,
                               controller: _passwordController,
                               decoration: const InputDecoration(
                                 hintText: 'Password',
