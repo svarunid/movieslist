@@ -85,6 +85,7 @@ class LogInScreen extends HookConsumerWidget {
                             sizedBox,
                             TextFormField(
                               focusNode: _focus,
+                              obscureText: true,
                               controller: _passwordController,
                               decoration: const InputDecoration(
                                 hintText: 'Password',

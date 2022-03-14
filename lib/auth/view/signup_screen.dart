@@ -107,6 +107,7 @@ class SignUpScreen extends HookConsumerWidget {
                     sizedBox,
                     TextFormField(
                         focusNode: _passwordfocus,
+                        obscureText: true,
                         decoration: const InputDecoration(
                           hintText: 'Password',
                         ),
