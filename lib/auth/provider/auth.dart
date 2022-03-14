@@ -75,8 +75,7 @@ class Auth extends StateNotifier<AuthState> {
 
     String? response = await storage.read(key: 'user');
 
-    List<Map<String, String>> users =
-        response == null ? [] : jsonDecode(response);
+    List users = response == null ? [] : jsonDecode(response);
 
     await storage.write(
       key: 'user',

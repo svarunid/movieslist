@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../provider/auth.dart';
 
-
 class SignUpScreen extends HookConsumerWidget {
   SignUpScreen({Key? key}) : super(key: key);
 
