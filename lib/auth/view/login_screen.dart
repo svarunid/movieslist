@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../main.dart';
 import '../../utils/utilities.dart';
+import '../provider/auth.dart';
 
 class LogInScreen extends HookConsumerWidget {
   LogInScreen({Key? key}) : super(key: key);
@@ -19,21 +19,23 @@ class LogInScreen extends HookConsumerWidget {
       height: 14,
     );
 
-    void logIn() {
-      ref
-          .read(authProvider.notifier)
-          .logIn(
-            email: _emailController.text,
-            password: _passwordController.text,
-          )
-          .catchError((e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).errorColor,
-          ),
-        );
-      });
+    void logIn() async {
+      if (_formKey.currentState!.validate()) {
+        try {
+          await ref.read(authProvider.notifier).logIn(
+                email: _emailController.text,
+                password: _passwordController.text,
+              );
+          Navigator.of(context).pop();
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Theme.of(context).errorColor,
+            ),
+          );
+        }
+      }
     }
 
     return WillPopScope(

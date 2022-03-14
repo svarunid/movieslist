@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'main.dart';
+import 'auth/provider/auth.dart';
 import 'utils/utilities.dart';
 import 'auth/view/welcome_screen.dart';
 import 'movies/view/movies_screen.dart';

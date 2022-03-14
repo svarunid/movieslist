@@ -33,21 +33,26 @@ class Auth extends StateNotifier<AuthState> {
     String? response = await storage.read(key: 'user');
 
     if (response == null) {
-      state = AuthState.loggedOut;
+      logOut();
       throw LogInException('No user Found');
     }
 
-    List<Map<String, String>> userPasswordJSON = jsonDecode(response);
-    String userPassword = userPasswordJSON.firstWhere(
-          (element) {
-            return element.containsKey(email);
-          },
-        )['password'] ??
-        "";
-    if (password != userPassword) {
-      state = AuthState.loggedOut;
+    List userPasswordJSON = jsonDecode(response);
+
+    Map userPasswordMap = userPasswordJSON.firstWhere((element) {
+      return element.containsValue(email);
+    }, orElse: () => {});
+
+    if (userPasswordMap.isEmpty) {
+      logOut();
+      throw LogInException('No user Found');
+    }
+
+    if (password != userPasswordMap['password']) {
+      logOut();
       throw LogInException('Check your password');
     }
+
     state = AuthState.loggedIn;
   }
 
@@ -79,7 +84,7 @@ class Auth extends StateNotifier<AuthState> {
         users..add(user.toJson()),
       ),
     );
-    
+
     await storage.write(
       key: 'status',
       value: "1",
@@ -89,4 +94,12 @@ class Auth extends StateNotifier<AuthState> {
 
     return user;
   }
+
+  void logOut() {
+    state = AuthState.loggedOut;
+  }
 }
+
+final authProvider = StateNotifierProvider<Auth, AuthState>(
+  (ref) => Auth(const FlutterSecureStorage()),
+);
