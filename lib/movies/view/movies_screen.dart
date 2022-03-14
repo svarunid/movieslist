@@ -1,19 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:movieslist/auth/provider/auth.dart';
-import 'package:movieslist/movies/provider/movies_provider.dart';
+import 'package:movieslist/movies/view/info_screen.dart';
+
+import '../model/movie.dart';
+import '../provider/movies_provider.dart';
 
 class MoviesScreen extends HookConsumerWidget {
   const MoviesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(moviesProvider.notifier).getMovies();
+    List<Movie> movies = ref.watch(moviesProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Movies List'),
       ),
-      body: Container(),
+      body: movies.isEmpty
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  kToolbarHeight,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemBuilder: (ctx, index) {
+                  return MovieListItem(
+                    director: movies[index].director!,
+                    genre: movies[index].genre!,
+                    movieName: movies[index].title!,
+                    pageViews: movies[index].pageViews!,
+                    releaseDate: movies[index].releasedDate!,
+                    stars: movies[index].stars!,
+                    url: movies[index].imgUrl!,
+                    votes: movies[index].totalVoted!,
+                  );
+                },
+                itemCount: movies.length,
+              ),
+            ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -22,14 +50,17 @@ class MoviesScreen extends HookConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: const Text(
+              child: Text(
                 'Movies List',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
             ListTile(
               title: const Text('Company Info'),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: ((context) => InfoScreen())));
+              },
             ),
             ListTile(
               title: const Text('Log Out'),
@@ -45,132 +76,140 @@ class MoviesScreen extends HookConsumerWidget {
 }
 
 class MovieListItem extends StatelessWidget {
-  final releaseDate;
-
+  final String releaseDate;
   final String director;
-
   final String genre;
-
   final String movieName;
-
-  final int votes;
-
+  final String votes;
   final String url;
+  final String stars;
+  final String pageViews;
 
-  const MovieListItem(
-      {Key? key,
-      this.director = '',
-      this.genre = '',
-      this.releaseDate,
-      this.movieName = '',
-      this.votes = 0,
-      this.url = ''})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var stars;
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Row(
-          children: [
-            Voting(votes: votes),
-            const SizedBox(
-              width: 15,
-            ),
-            Image.network(
-              url,
-              width: MediaQuery.of(context).size.width * 0.15,
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Column(
-              children: [
-                Text(
-                  movieName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(
-                  height: 14,
-                ),
-                Text.rich(
-                  TextSpan(
-                    text: 'Genre: ',
-                    children: [
-                      TextSpan(text: genre),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Text.rich(
-                  TextSpan(
-                    text: 'Director: ',
-                    children: [
-                      TextSpan(text: director),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Text.rich(
-                  TextSpan(
-                    text: 'Staring: ',
-                    children: [
-                      TextSpan(text: stars),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Text('Mins | Kannada | $releaseDate'),
-              ],
-            )
-          ],
-        ),
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Watch Trailer'),
-        )
-      ],
-    );
-  }
-}
-
-class Voting extends StatelessWidget {
-  final int votes;
-
-  const Voting({
+  const MovieListItem({
     Key? key,
-    this.votes = 0,
+    this.director = '',
+    this.genre = '',
+    this.stars = '',
+    this.releaseDate = '',
+    this.movieName = '',
+    this.votes = '',
+    this.url = '',
+    this.pageViews = '',
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Spacer(),
-        const Icon(Icons.arrow_drop_up),
-        const Spacer(),
-        Text(
-          '$votes',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  children: const [
+                    Icon(Icons.arrow_drop_up),
+                    Text('1'),
+                    Icon(Icons.arrow_drop_down),
+                    Text('Votes')
+                  ],
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Image.network(
+                    url,
+                    height: 120,
+                    loadingBuilder: (ctx, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        movieName,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black),
+                          text: 'Genre: ',
+                          children: [
+                            TextSpan(
+                              text: genre,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black),
+                          text: 'Director: ',
+                          children: [
+                            TextSpan(
+                              text: director,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black),
+                          text: 'Starring: ',
+                          children: [
+                            TextSpan(
+                              text: stars,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text('Mins | Kannada | $releaseDate'),
+                      Text(
+                        '$pageViews | Voted by $votes people',
+                        style: TextStyle(color: Colors.cyan),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            ElevatedButton(
+              child: const Text("Watch Trailer"),
+              onPressed: () {},
+            )
+          ],
         ),
-        const Spacer(),
-        const Icon(Icons.arrow_drop_down),
-        const SizedBox(
-          height: 16,
-        ),
-        const Text('Votes')
-      ],
+      ),
     );
   }
 }

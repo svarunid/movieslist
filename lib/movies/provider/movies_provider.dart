@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-class Movies extends StateNotifier {
-  List? movies;
+import '../model/movie.dart';
 
-  Movies() : super([]);
+class Movies extends StateNotifier<List<Movie>> {
+  Movies() : super([]) {
+    getMovies();
+  }
 
   Future<void> getMovies() async {
     String url = 'https://hoblist.com/api/movieList';
@@ -15,8 +19,13 @@ class Movies extends StateNotifier {
       "sort": "voting",
     };
     final response = await http.post(Uri.parse(url), body: body);
-    print(response.body);
+    final List responseJSON = jsonDecode(response.body)['result'];
+    state = List.generate(
+      responseJSON.length,
+      (index) => Movie.fromJson(responseJSON[index]),
+    );
   }
 }
 
-final moviesProvider = StateNotifierProvider(((ref) => Movies()));
+final moviesProvider =
+    StateNotifierProvider<Movies, List<Movie>>(((ref) => Movies()));
